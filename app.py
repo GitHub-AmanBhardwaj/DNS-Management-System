@@ -9,13 +9,11 @@ from dns.rdatatype import A, CNAME, MX, TXT
 import os
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'supersecretkey')
-DOMAIN = os.getenv('DOMAIN', 'aman@cloud')
-DNS_SERVER = "127.0.0.1"
-KEYRING = None
+app.secret_key = "supersecretkey"  # For flash messages
 
+# Initialize SQLite database
 def init_db():
-    conn = sqlite3.connect('/tmp/dns_records.db')
+    conn = sqlite3.connect('dns_records.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS records
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,15 +25,18 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Initialize database on app startup
-with app.app_context():
-    init_db()
-
+# Helper to connect to SQLite
 def get_db():
-    conn = sqlite3.connect('/tmp/dns_records.db')
+    conn = sqlite3.connect('dns_records.db')
     conn.row_factory = sqlite3.Row
     return conn
 
+# Simulated DNS server configuration
+DNS_SERVER = "127.0.0.1"
+DOMAIN = "aman@cloud"
+KEYRING = None
+
+# Simulate DNS update
 def update_dns_record(domain, name, rtype, value, ttl, action="UPSERT"):
     try:
         print(f"Simulated DNS {action}: {name}.{domain} {rtype} {value} TTL {ttl}")
@@ -44,6 +45,7 @@ def update_dns_record(domain, name, rtype, value, ttl, action="UPSERT"):
         print(f"DNS update error: {e}")
         return False
 
+# Web Routes
 @app.route('/')
 def index():
     conn = get_db()
@@ -81,7 +83,7 @@ def add_record():
             conn.close()
             return redirect(url_for('add_record'))
 
-    return render_template('add.html', DOMAIN=DOMAIN)
+    return render_template('add.html',DOMAIN=DOMAIN)
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit_record(id):
@@ -142,6 +144,7 @@ def delete_record(id):
     conn.close()
     return redirect(url_for('index'))
 
+# API Routes (for future extensibility)
 @app.route('/api/records', methods=['POST'])
 def api_create_record():
     data = request.get_json()
@@ -226,3 +229,8 @@ def api_delete_record(id):
     else:
         conn.close()
         return jsonify({"error": "DNS delete failed"}), 500
+
+if __name__ == '__main__':
+    if not os.path.exists('dns_records.db'):
+        init_db()
+    app.run(debug=True, host='127.0.0.1', port=5000)
