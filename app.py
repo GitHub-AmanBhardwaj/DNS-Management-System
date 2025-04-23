@@ -233,5 +233,3 @@ def api_delete_record(id):
 if __name__ == '__main__':
     if not os.path.exists('dns_records.db'):
         init_db()
-    port = int(os.getenv('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
