@@ -27,6 +27,10 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Initialize database on app startup
+with app.app_context():
+    init_db()
+
 def get_db():
     conn = sqlite3.connect('/tmp/dns_records.db')
     conn.row_factory = sqlite3.Row
@@ -222,7 +226,3 @@ def api_delete_record(id):
     else:
         conn.close()
         return jsonify({"error": "DNS delete failed"}), 500
-
-if __name__ == '__main__':
-    if not os.path.exists('/tmp/dns_records.db'):
-        init_db()
