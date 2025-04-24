@@ -1,9 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 import sqlite3
-import dns.resolver
-import dns.update
-import dns.query
-import dns.tsigkeyring
 from dns.rdataclass import IN
 from dns.rdatatype import A, CNAME, MX, TXT
 import os
